@@ -1,15 +1,19 @@
 # Start from ubuntu
-FROM ubuntu:17.04
+FROM ubuntu:16.04
 
-# Update repos and install dependencies
-RUN apt-get update \
-  && apt-get -y upgrade \
-  && apt-get -y install git build-essential libsqlite3-dev zlib1g-dev
+# Install dependencies
+RUN apt-get update && apt-get -y install \
+	build-essential libsqlite3-dev zlib1g-dev wget unzip \
+	protobuf-compiler libprotobuf-dev
+
+ENV TC_VERSION 1.27.6
 
 # Create a directory and copy in all files
-RUN mkdir -p /tmp/tippecanoe-src
-RUN git clone https://github.com/mapbox/tippecanoe.git /tmp/tippecanoe-src
-WORKDIR /tmp/tippecanoe-src
+WORKDIR /tmp
+RUN wget https://codeload.github.com/mapbox/tippecanoe/zip/${TC_VERSION} -O /tmp/tippecanoe.zip \
+	&& unzip /tmp/tippecanoe.zip
+
+WORKDIR /tmp/tippecanoe-${TC_VERSION}
 
 # Build tippecanoe
 RUN make \
@@ -22,4 +26,3 @@ RUN rm -rf /tmp/tippecanoe-src \
 
 # Run the default command to show usage
 CMD tippecanoe --help
-
